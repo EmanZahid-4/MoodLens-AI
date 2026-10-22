@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Find beginner-friendly open source issues on GitHub by language. Built for Hacktoberfest.">
+<title>Issue Finder: your first open source contribution</title>
+<style>
+:root{--bg:#f2f4f8;--surface:#fff;--ink:#101828;--muted:#586178;--line:#d9deea;--accent:#5b3df5;--accent-ink:#fff;--ok:#0d7a55;--warn:#a15c07;
+color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1116;--surface:#161b22;--ink:#e8ecf4;--muted:#9aa4bb;--line:#2a3242;--accent:#9585ff;--accent-ink:#0e1116;--ok:#4be0a8;--warn:#f2c14e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1116;--surface:#161b22;--ink:#e8ecf4;--muted:#9aa4bb;--line:#2a3242;--accent:#9585ff;--accent-ink:#0e1116;--ok:#4be0a8;--warn:#f2c14e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:28px 18px 70px}
+.top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+h1{font-size:clamp(1.9rem,6vw,3rem);line-height:1.08;letter-spacing:-.025em;margin:0;max-width:17ch}
+.lead{color:var(--muted);margin:12px 0 0;max-width:56ch}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.ghost{background:none;border:1px solid var(--line);border-radius:999px;padding:8px 14px;color:var(--muted)}
+.panel{margin-top:26px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{border:1px solid var(--line);background:none;border-radius:999px;padding:6px 13px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+label{display:grid;gap:4px;font-size:.88rem;font-weight:600}
+input,select{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);width:100%}
+.go{margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:11px 20px;font-weight:600}
+.primary:disabled{opacity:.6;cursor:wait}
+.tabs{display:flex;gap:8px;margin:28px 0 12px}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:6px 2px;margin-right:14px;font-weight:600;color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.meta{color:var(--muted);font-size:.92rem;margin:0 0 12px}
+.issue{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:8px 14px}
+.issue h3{margin:0;font-size:1.02rem;line-height:1.3;overflow-wrap:anywhere}
+.issue h3 a{color:var(--ink);text-decoration-color:var(--line);text-underline-offset:3px}
+.issue h3 a:hover{color:var(--accent)}
+.repo{color:var(--muted);font-size:.88rem;grid-column:1}
+.facts{grid-column:1;display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.84rem;color:var(--muted)}
+.fresh{color:var(--ok);font-weight:600}
+.busy{color:var(--warn);font-weight:600}
+.labels{grid-column:1;display:flex;flex-wrap:wrap;gap:6px}
+.lab{font-size:.75rem;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.save{grid-column:2;grid-row:1 / span 2;align-self:start;border:1px solid var(--line);background:none;border-radius:8px;padding:6px 10px;font-size:.85rem}
+.save[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.msg{padding:16px;border:1px dashed var(--line);border-radius:10px;color:var(--muted)}
+.msg.err{border-color:var(--warn);color:var(--ink)}
+.more{display:block;margin:16px auto 0}
+@media (max-width:640px){.row{grid-template-columns:1fr}.issue{grid-template-columns:1fr}.save{grid-column:1;grid-row:auto;justify-self:start}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+  <div>
+    <h1>Find your first open source issue</h1>
+    <p class="lead">Pick a language and get fresh, unassigned beginner issues straight from GitHub. Save the ones you like and start contributing.</p>
+  </div>
+  <button class="ghost" id="theme" type="button">Switch theme</button>
+</div>
+
+<div class="panel">
+  <div class="chips" id="chips" role="group" aria-label="Popular languages"></div>
+  <div class="row">
+    <label>Language<input id="lang" value="JavaScript" list="langs" placeholder="e.g. Python">
+      <datalist id="langs"></datalist></label>
+    <label>Issue type
+      <select id="kind">
+        <option value="good first issue">Good first issue</option>
+        <option value="help wanted">Help wanted</option>
+        <option value="documentation">Documentation</option>
+        <option value="hacktoberfest">Hacktoberfest</option>
+      </select></label>
+    <label>Sort by
+      <select id="sort">
+        <option value="created">Newest first</option>
+        <option value="updated">Recently active</option>
+        <option value="comments">Most discussed</option>
+      </select></label>
+  </div>
+  <label style="margin-top:10px">Keyword (optional)<input id="kw" placeholder="e.g. button, readme, typo"></label>
+  <div class="go"><button class="primary" id="search" type="button">Find issues</button><span id="state" class="meta" style="margin:0" role="status"></span></div>
+</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="t-res" aria-selected="true" type="button">Results</button>
+  <button class="tab" role="tab" id="t-sav" aria-selected="false" type="button">Saved (<span id="n">0</span>)</button>
+</div>
+<p class="meta" id="info"></p>
+<div id="list"></div>
+<button class="ghost more" id="more" type="button" hidden>Load more issues</button>
+</div>
+
+<script>
+var $=function(i){return document.getElementById(i)};
+var LANGS=["JavaScript","Python","TypeScript","Java","C++","Go","Rust","PHP","Dart","HTML"];
+var kinds={}, results=[], saved=[], page=1, total=0, view="res", lastQ="";
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function loadSaved(){try{var r=localStorage.getItem("issuefinder-saved");if(r){var d=JSON.parse(r);if(Array.isArray(d))saved=d}}catch(e){}}
+function persist(){try{localStorage.setItem("issuefinder-saved",JSON.stringify(saved))}catch(e){}}
+function ago(iso){var d=Math.floor((Date.now()-new Date(iso))/864e5);return d<1?"today":d===1?"1 day ago":d<30?d+" days ago":d<365?Math.floor(d/30)+" months ago":Math.floor(d/365)+" years ago"}
+function isSaved(id){return saved.some(function(s){return s.id===id})}
+
+function card(it){
+  var fresh=it.comments===0?'<span class="fresh">No comments yet</span>':it.comments<4?'<span>'+it.comments+' comments</span>':'<span class="busy">'+it.comments+' comments, check if it is still open to take</span>';
+  var labs=(it.labels||[]).slice(0,5).map(function(l){return '<span class="lab">'+esc(l)+'</span>'}).join("");
+  var on=isSaved(it.id);
+  return '<article class="issue"><h3><a href="'+esc(it.url)+'" target="_blank" rel="noopener noreferrer">'+esc(it.title)+'</a></h3>'+
+    '<button class="save" data-id="'+it.id+'" aria-pressed="'+on+'" type="button">'+(on?"Saved":"Save")+'</button>'+
+    '<div class="repo">'+esc(it.repo)+'</div>'+
+    '<div class="facts"><span>Opened '+ago(it.created)+'</span><span>Updated '+ago(it.updated)+'</span>'+fresh+'</div>'+
+    '<div class="labels">'+labs+'</div></article>';
+}
+function render(){
+  var list=view==="res"?results:saved;
+  $("n").textContent=saved.length;
+  if(!list.length){
+    $("list").innerHTML='<div class="msg">'+(view==="res"?"Choose a language and press Find issues.":"Nothing saved yet. Press Save on an issue you want to work on.")+'</div>';
+  }else $("list").innerHTML=list.map(card).join("");
+  $("more").hidden=!(view==="res"&&results.length&&results.length<total);
+  $("info").textContent=view==="res"&&results.length?"Showing "+results.length+" of "+total.toLocaleString()+" open issues. Comment on an issue and wait to be assigned before you start.":"";
+}
+
+function buildQuery(){
+  var lang=$("lang").value.trim(),kind=$("kind").value,kw=$("kw").value.trim();
+  var q='is:issue is:open no:assignee archived:false label:"'+kind+'"';
+  if(lang)q+=' language:"'+lang+'"';
+  if(kw)q+=" "+kw+" in:title,body";
+  return q;
+}
+function fetchPage(){
+  var url="https://api.github.com/search/issues?q="+encodeURIComponent(buildQuery())+"&sort="+$("sort").value+"&order=desc&per_page=20&page="+page;
+  $("search").disabled=true;$("more").disabled=true;$("state").textContent="Searching GitHub…";
+  return fetch(url,{headers:{"Accept":"application/vnd.github+json"}}).then(function(r){
+    if(r.status===403||r.status===429){
+      var reset=r.headers.get("x-ratelimit-reset");
+      var when=reset?new Date(reset*1000).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):"a few minutes";
+      throw new Error("GitHub's free search limit is used up. Try again at "+when+".");
+    }
+    if(!r.ok)throw new Error("GitHub could not run this search (error "+r.status+"). Try a different language or keyword.");
+    return r.json();
+  }).then(function(d){
+    total=Math.min(d.total_count||0,1000);
+    var items=(d.items||[]).map(function(i){
+      return {id:i.id,title:i.title,url:i.html_url,repo:(i.repository_url||"").replace("https://api.github.com/repos/",""),
+        comments:i.comments,created:i.created_at,updated:i.updated_at,labels:(i.labels||[]).map(function(l){return l.name})};
+    });
+    results=page===1?items:results.concat(items);
+    $("state").textContent=items.length?"":"No issues found.";
+    render();
+  }).catch(function(e){
+    var offline=e instanceof TypeError;
+    $("list").innerHTML='<div class="msg err">'+esc(offline?"Could not reach GitHub. Check your internet connection. If you opened this page inside a preview window, open it from GitHub Pages or as a local file instead.":e.message)+'</div>';
+    $("state").textContent="";$("more").hidden=true;
+    if(page>1)page--;
+  }).then(function(){$("search").disabled=false;$("more").disabled=false});
+}
+function newSearch(){view="res";setTabs();page=1;results=[];fetchPage()}
+function setTabs(){$("t-res").setAttribute("aria-selected",view==="res");$("t-sav").setAttribute("aria-selected",view==="sav")}
+
+$("search").onclick=newSearch;
+$("kw").addEventListener("keydown",function(e){if(e.key==="Enter")newSearch()});
+$("lang").addEventListener("keydown",function(e){if(e.key==="Enter")newSearch()});
+$("more").onclick=function(){page++;fetchPage()};
+$("t-res").onclick=function(){view="res";setTabs();render()};
+$("t-sav").onclick=function(){view="sav";setTabs();render()};
+$("list").addEventListener("click",function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-id");if(!id)return;
+  id=Number(id);
+  if(isSaved(id))saved=saved.filter(function(s){return s.id!==id});
+  else{var f=results.concat(saved).filter(function(x){return x.id===id})[0];if(f)saved.unshift(f)}
+  persist();render();
+});
+$("chips").innerHTML=LANGS.map(function(l){return '<button class="chip" type="button" aria-pressed="false" data-l="'+l+'">'+l+'</button>'}).join("");
+$("langs").innerHTML=LANGS.map(function(l){return '<option value="'+l+'">'}).join("");
+$("chips").addEventListener("click",function(e){
+  var l=e.target.getAttribute("data-l");if(!l)return;
+  $("lang").value=l;
+  [].forEach.call($("chips").children,function(c){c.setAttribute("aria-pressed",c.getAttribute("data-l")===l)});
+  newSearch();
+});
+$("theme").onclick=function(){var r=document.documentElement;r.setAttribute("data-theme",getComputedStyle(r).colorScheme==="dark"?"light":"dark")};
+loadSaved();render();
+</script>
+</body>
+</html>
